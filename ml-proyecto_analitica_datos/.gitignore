@@ -1,0 +1,23 @@
+# Entornos Virtuales
+venv/
+env/
+.env
+
+# Archivos compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Datos crudos y procesados 
+*.csv
+*.dat
+*.sql
+*.sqlite
+
+# Credenciales y secretos
+credenciales.json
+keys.txt
+
+# Archivos del Sistema Operativo
+.DS_Store
+Thumbs.db
