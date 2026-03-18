@@ -9,7 +9,7 @@ __pycache__/
 *$py.class
 
 # Datos crudos y procesados 
-*.csv
+
 *.dat
 *.sql
 *.sqlite
