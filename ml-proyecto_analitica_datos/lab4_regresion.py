@@ -1,10 +1,3 @@
-# =============================================================================
-# LABORATORIO #4 - ANALÍTICA DE DATOS - UNIVERSIDAD DE ANTIOQUIA
-# Profesor: Duván Cataño
-# Tema: Pipeline completo de Regresión sobre datos de Airbnb (listings)
-# Variable objetivo: price (precio por noche en USD)
-# =============================================================================
-#
 # ¿QUÉ ES ESTE ARCHIVO?
 # Este script de Python realiza todo el proceso de construir modelos de Machine
 # Learning para PREDECIR el precio de alojamientos en Airbnb. Es como enseñarle
@@ -46,6 +39,7 @@ from sklearn.model_selection import (
     GridSearchCV,            # Búsqueda exhaustiva de hiperparámetros
     RandomizedSearchCV       # Búsqueda aleatoria de hiperparámetros (más rápida)
 )
+from sklearn.model_selection import cross_val_score
 from sklearn.pipeline import Pipeline          # Une pasos de preprocesamiento + modelo
 from sklearn.compose import ColumnTransformer  # Aplica transformaciones distintas por columna
 from sklearn.preprocessing import (
@@ -87,7 +81,7 @@ print("=" * 70)
 # Contiene información de anuncios de Airbnb: precio, barrio, tipo de cuarto, etc.
 
 RUTA_DATASET = os.path.join(
-    "data", "raw", "dataset_regresion_listings.csv"
+    "ml-proyecto_analitica_datos", "data", "raw", "dataset_regresion_listings.csv"
 )
 # NOTA: Si ejecutas este script desde la carpeta raíz del proyecto, cambia la
 # ruta a: "data/raw/dataset_regresion_listings.csv"
@@ -158,9 +152,9 @@ VARIABLES_NUMERICAS = [
 ]
 
 VARIABLES_CATEGORICAS = [
-    "neighbourhood",       # Barrio del alojamiento
-    "room_type"            # Tipo: casa entera / habitación privada / compartida
+    "room_type"              # Tipo de habitación
 ]
+
 
 VARIABLE_OBJETIVO = "price"
 
@@ -449,39 +443,51 @@ print(f"    RMSE CV (mejor Ridge): {mejor_rmse_ridge:.4f}")
 print(f"    RMSE CV (Ridge base):  {resultados_cv['Ridge']['RMSE_mean']:.4f}")
 
 # --- 6.2 Modelo NO LINEAL: Random Forest ---
-print("\n  Ajustando Random Forest (modelo de árboles)...")
+print("\n  Ajustando LightGBM (modelo de árboles)...")
 
-# Grilla de hiperparámetros para Random Forest:
-# n_estimators: número de árboles (más árboles = más estable pero más lento)
-# max_depth: profundidad máxima de cada árbol (limita la complejidad)
-# min_samples_split: mínimo de muestras para dividir un nodo
-param_grid_rf = {
-    "modelo__n_estimators":    [50, 100, 200],
-    "modelo__max_depth":       [None, 10, 20],
-    "modelo__min_samples_split": [2, 5]
+# Grilla de hiperparámetros para LightGBM:
+# n_estimators:   número de árboles en el boosting secuencial
+# max_depth:      profundidad máxima de cada árbol (-1 = sin límite)
+# learning_rate:  qué tan rápido aprende cada árbol nuevo (menor = más cuidadoso)
+# num_leaves:     número máximo de hojas por árbol (controla complejidad)
+# min_child_samples: mínimo de observaciones requeridas en una hoja (evita sobreajuste)
+param_grid_lgbm = {
+    "modelo__n_estimators":      [100, 200, 300],
+    "modelo__max_depth":         [-1, 6, 10],
+    "modelo__learning_rate":     [0.05, 0.1, 0.2],
+    "modelo__num_leaves":        [31, 63, 127],
+    "modelo__min_child_samples": [20, 50]
 }
 
-# RandomizedSearchCV: prueba solo una MUESTRA ALEATORIA de combinaciones.
-# Con n_iter=20, prueba 20 combinaciones en lugar de las 18 posibles (3×3×2).
-# Más eficiente cuando la grilla es grande.
-gs_rf = RandomizedSearchCV(
-    PIPELINES["Random Forest"],
-    param_grid_rf,
-    n_iter=15,               # Probar 15 combinaciones aleatorias
+# RandomizedSearchCV: con 5 parámetros la grilla completa serían 3×3×3×3×2 = 162
+# combinaciones — demasiado costoso. Con n_iter=20 probamos solo 20 aleatorias.
+gs_lgbm = RandomizedSearchCV(
+    PIPELINES["LightGBM"],
+    param_grid_lgbm,
+    n_iter=20,               # Probar 20 combinaciones aleatorias
     cv=kf,
     scoring="neg_root_mean_squared_error",
     n_jobs=-1,
     random_state=42,
     verbose=0
 )
-gs_rf.fit(X_train, y_train)
+gs_lgbm.fit(X_train, y_train)
 
-mejor_params_rf = gs_rf.best_params_
-mejor_rmse_rf   = -gs_rf.best_score_
+mejor_params_lgbm = gs_lgbm.best_params_
+mejor_rmse_lgbm   = -gs_lgbm.best_score_
 
-print(f"    Mejores hiperparámetros: {mejor_params_rf}")
-print(f"    RMSE CV (mejor RF):      {mejor_rmse_rf:.4f}")
-print(f"    RMSE CV (RF base):       {resultados_cv['Random Forest']['RMSE_mean']:.4f}")
+print(f"    Mejores hiperparámetros: {mejor_params_lgbm}")
+print(f"    RMSE CV (mejor LightGBM): {mejor_rmse_lgbm:.4f}")
+print(f"    RMSE CV (LightGBM base):  {resultados_cv['LightGBM']['RMSE_mean']:.4f}")
+
+r2_scores_lgbm = cross_val_score(
+    gs_lgbm.best_estimator_,   # El pipeline con los mejores hiperparámetros
+    X_train, y_train,
+    cv=kf,
+    scoring="r2",
+    n_jobs=-1
+)
+print(f"    R² CV (mejor LightGBM):   {r2_scores_lgbm.mean():.4f}")
 
 
 # =============================================================================
@@ -497,7 +503,7 @@ print("\n[7/8] Evaluación Final en conjunto de Test (Hold-Out)...")
 # Comparamos: mejor Ridge ajustado, mejor RF ajustado, y el mejor modelo de CV
 candidatos_finales = {
     "Ridge (ajustado)":         (gs_ridge.best_estimator_, mejor_rmse_ridge),
-    "Random Forest (ajustado)": (gs_rf.best_estimator_,   mejor_rmse_rf),
+    "Random Forest (ajustado)": (gs_lgbm.best_estimator_,   mejor_rmse_lgbm),
 }
 # Añadir el mejor modelo de CV si no es Ridge ni RF
 if mejor_modelo_cv not in ["Ridge", "Random Forest"]:
@@ -737,7 +743,7 @@ try:
     # --- Subfigura 4b: Feature Importance del Random Forest ajustado ---
     # En Random Forest, la importancia mide cuánto contribuye cada variable
     # a reducir el error en los árboles. Más alto = más importante.
-    rf_pipe = gs_rf.best_estimator_
+    rf_pipe = gs_lgbm.best_estimator_
     if not hasattr(rf_pipe.named_steps["preprocesador"], "transformers_"):
         rf_pipe.fit(X_train, y_train)
 
