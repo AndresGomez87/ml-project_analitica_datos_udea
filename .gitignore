@@ -97,6 +97,14 @@ logs/
 # ── Streamlit ────────────────────────────────────────────────────────
 .streamlit/secrets.toml
 
+# ── Flask ────────────────────────────────────────────────────────────
+instance/
+flask_session/
+
+# ── Optuna ───────────────────────────────────────────────────────────
+optuna_studies/
+*.db-journal
+
 # ── Agents / skills (generados por herramientas externas) ───────────
 .agents/
 skills-lock.json

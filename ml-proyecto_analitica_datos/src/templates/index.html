@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytix Intelligence — ML Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+/* ── Reset & base ──────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07080d;--bg2:#0d0f1c;--bg3:#111320;
+  --card:rgba(255,255,255,.042);--card-h:rgba(255,255,255,.07);
+  --border:rgba(255,255,255,.08);--border-h:rgba(255,255,255,.16);
+  --text:#f1f5f9;--muted:#8b9cb8;--faint:#3d4a62;
+  --red:#FF385C;--red-d:#BD1E59;--red-g:linear-gradient(135deg,#FF385C,#BD1E59);
+  --pur:#8B5CF6;--pur-d:#6D28D9;--pur-g:linear-gradient(135deg,#8B5CF6,#6D28D9);
+  --grn:#10b981;--ora:#f59e0b;--blu:#3b82f6;
+  --radius:16px;--shadow:0 24px 64px rgba(0,0,0,.55);
+  --font:'Plus Jakarta Sans',sans-serif;
+  --font-body:'Inter',sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.65;overflow-x:hidden}
+
+/* ── Animated background ───────────────────────────────── */
+.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;opacity:.25;animation:drift 18s ease-in-out infinite alternate}
+.orb-1{width:500px;height:500px;background:var(--red-d);top:-160px;right:-100px;animation-duration:22s}
+.orb-2{width:420px;height:420px;background:var(--pur-d);bottom:-140px;left:-80px;animation-duration:18s}
+.orb-3{width:280px;height:280px;background:#1a73e8;top:40%;left:40%;animation-duration:15s;opacity:.12}
+@keyframes drift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.08)}}
+
+/* ── Layout ────────────────────────────────────────────── */
+.container{max-width:1200px;margin:0 auto;padding:0 24px;position:relative;z-index:1}
+
+/* ── Navigation ────────────────────────────────────────── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;
+    background:rgba(7,8,13,.8);backdrop-filter:blur(20px);
+    border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo-icon{width:34px;height:34px;border-radius:10px;
+    background:linear-gradient(135deg,var(--red),var(--pur));
+    display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-logo-text{font-family:var(--font);font-weight:800;font-size:1.05rem;
+    background:linear-gradient(135deg,#fff,#94a3b8);-webkit-background-clip:text;
+    -webkit-text-fill-color:transparent}
+.nav-links{display:flex;align-items:center;gap:8px}
+.nav-links a{text-decoration:none;padding:8px 16px;border-radius:8px;
+    font-size:.88rem;font-weight:500;color:var(--muted);
+    transition:all .2s;border:1px solid transparent}
+.nav-links a:hover,.nav-links a.active{color:var(--text);background:var(--card);border-color:var(--border)}
+.nav-badge{font-size:.7rem;padding:2px 8px;border-radius:20px;margin-left:6px;vertical-align:middle}
+.badge-red{background:rgba(255,56,92,.15);color:var(--red);border:1px solid rgba(255,56,92,.25)}
+.badge-pur{background:rgba(139,92,246,.15);color:var(--pur);border:1px solid rgba(139,92,246,.25)}
+.badge-grn{background:rgba(16,185,129,.15);color:var(--grn);border:1px solid rgba(16,185,129,.25)}
+.badge-ora{background:rgba(245,158,11,.15);color:var(--ora);border:1px solid rgba(245,158,11,.25)}
+
+/* ── Hero ──────────────────────────────────────────────── */
+.hero{min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:120px 24px 80px}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;
+    border-radius:20px;background:var(--card);border:1px solid var(--border);
+    font-size:.8rem;font-weight:500;color:var(--muted);margin-bottom:28px;letter-spacing:.08em;text-transform:uppercase}
+.hero-eyebrow span{width:6px;height:6px;border-radius:50%;background:var(--grn);
+    box-shadow:0 0 8px var(--grn);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.9)}}
+.hero h1{font-family:var(--font);font-size:clamp(2.8rem,7vw,5rem);font-weight:800;
+    line-height:1.05;letter-spacing:-.04em;margin-bottom:20px;max-width:900px}
+.hero h1 span{background:linear-gradient(135deg,var(--red) 20%,var(--pur) 80%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-sub{font-size:1.15rem;color:var(--muted);max-width:640px;margin:0 auto 48px;font-weight:400}
+.hero-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:840px;margin:0 auto}
+.hero-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:28px;text-align:left;cursor:pointer;transition:all .3s;text-decoration:none;color:var(--text);
+    position:relative;overflow:hidden}
+.hero-card::before{content:'';position:absolute;inset:0;opacity:0;transition:.3s;
+    background:var(--card-h)}
+.hero-card:hover::before{opacity:1}
+.hero-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:var(--shadow)}
+.hc-tag{font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;
+    display:inline-block;padding:3px 10px;border-radius:6px}
+.hc-tag-red{background:rgba(255,56,92,.15);color:var(--red)}
+.hc-tag-pur{background:rgba(139,92,246,.15);color:var(--pur)}
+.hero-card h3{font-family:var(--font);font-size:1.4rem;font-weight:700;margin-bottom:8px}
+.hero-card p{font-size:.88rem;color:var(--muted);line-height:1.6}
+.hc-arrow{position:absolute;top:24px;right:24px;font-size:1.2rem;opacity:.4;transition:.3s}
+.hero-card:hover .hc-arrow{opacity:1;transform:translate(3px,-3px)}
+.scroll-hint{margin-top:56px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--faint);font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.scroll-arrow{width:24px;height:24px;border-right:2px solid var(--faint);border-bottom:2px solid var(--faint);
+    transform:rotate(45deg);animation:bounce 1.6s infinite}
+@keyframes bounce{0%,100%{transform:rotate(45deg) translateY(0)}50%{transform:rotate(45deg) translateY(5px)}}
+
+/* ── Section ────────────────────────────────────────────── */
+.section{padding:120px 0;position:relative}
+.section-header{text-align:center;margin-bottom:80px}
+.section-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;
+    border-radius:20px;font-size:.78rem;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;margin-bottom:20px}
+.tag-red{background:rgba(255,56,92,.12);color:var(--red);border:1px solid rgba(255,56,92,.2)}
+.tag-pur{background:rgba(139,92,246,.12);color:var(--pur);border:1px solid rgba(139,92,246,.2)}
+.section-header h2{font-family:var(--font);font-size:clamp(2rem,5vw,3.4rem);font-weight:800;
+    line-height:1.1;letter-spacing:-.03em;margin-bottom:16px}
+.grad-red{background:var(--red-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.grad-pur{background:var(--pur-g);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.section-header p{font-size:1.05rem;color:var(--muted);max-width:620px;margin:0 auto}
+
+/* ── Story block ────────────────────────────────────────── */
+.story-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-bottom:80px}
+.story-text p{color:var(--muted);font-size:.97rem;line-height:1.8;margin-bottom:16px}
+.story-text p strong{color:var(--text);font-weight:600}
+.story-text h3{font-family:var(--font);font-size:1.3rem;font-weight:700;margin-bottom:14px}
+.tech-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pill{padding:5px 12px;border-radius:6px;font-size:.78rem;font-weight:600;
+    background:var(--card);border:1px solid var(--border);color:var(--muted);
+    transition:.2s}
+.pill:hover{border-color:var(--border-h);color:var(--text)}
+.pill-accent-red{border-color:rgba(255,56,92,.3)!important;color:var(--red)!important}
+.pill-accent-pur{border-color:rgba(139,92,246,.3)!important;color:var(--pur)!important}
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:20px;margin-bottom:16px}
+.stat-mini .val{font-family:var(--font);font-size:1.8rem;font-weight:800;margin-bottom:4px}
+.stat-mini .lbl{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Divider ─────────────────────────────────────────────── */
+.reveal-divider{display:flex;align-items:center;gap:16px;margin:40px 0;color:var(--faint)}
+.reveal-divider::before,.reveal-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.reveal-divider span{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+
+/* ── Metrics grid ───────────────────────────────────────── */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:64px}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px;text-align:center;transition:all .3s}
+.metric-card:hover{background:var(--card-h);border-color:var(--border-h);transform:translateY(-2px)}
+.metric-card .m-val{font-family:var(--font);font-size:2rem;font-weight:800;margin-bottom:6px}
+.metric-card .m-lbl{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.metric-card .m-sub{font-size:.78rem;color:var(--faint)}
+.m-val-red{color:var(--red)}.m-val-pur{color:var(--pur)}.m-val-grn{color:var(--grn)}.m-val-ora{color:var(--ora)}.m-val-blu{color:var(--blu)}
+
+/* ── Form card ──────────────────────────────────────────── */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:32px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.form-grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.field input,.field select{background:rgba(0,0,0,.3);border:1px solid var(--border);
+    border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);
+    font-size:.92rem;width:100%;transition:.2s;appearance:none}
+.field input:focus,.field select:focus{outline:none;border-color:var(--border-h);background:rgba(0,0,0,.5)}
+.field select option{background:#1a1f2e;color:var(--text)}
+.form-section-title{font-family:var(--font);font-size:.95rem;font-weight:700;
+    color:var(--text);margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.btn-predict{width:100%;padding:14px;border:none;border-radius:10px;
+    font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;
+    transition:all .25s;margin-top:24px;letter-spacing:.01em}
+.btn-red{background:var(--red-g);color:white}
+.btn-red:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 30px rgba(255,56,92,.35)}
+.btn-pur{background:var(--pur-g);color:white}
+.btn-pur:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 8px 30px rgba(139,92,246,.35)}
+.btn-predict:active{transform:translateY(0)}
+.spinner{display:none;text-align:center;padding:20px;color:var(--muted);font-size:.9rem}
+.spinner.show{display:block}
+
+/* ── Result panels ───────────────────────────────────────── */
+#result-airbnb,#result-diabetes{display:none;margin-top:28px}
+#result-airbnb.show,#result-diabetes.show{display:block;animation:fadeUp .4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.result-card{border-radius:var(--radius);padding:28px;border:1px solid;margin-bottom:20px}
+.result-red{background:rgba(255,56,92,.07);border-color:rgba(255,56,92,.25)}
+.result-grn{background:rgba(16,185,129,.07);border-color:rgba(16,185,129,.25)}
+.result-ora{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.25)}
+.result-danger{background:rgba(239,68,68,.07);border-color:rgba(239,68,68,.25)}
+.price-display{text-align:center;margin-bottom:20px}
+.price-tag{font-family:var(--font);font-size:3.5rem;font-weight:800;color:var(--red)}
+.price-sub{font-size:.9rem;color:var(--muted);margin-top:6px}
+.compare-label{font-size:.88rem;color:var(--muted);margin-top:8px}
+.compare-label strong{color:var(--text)}
+.risk-display{text-align:center}
+.risk-percent{font-family:var(--font);font-size:3rem;font-weight:800}
+.risk-label{font-size:1.1rem;font-weight:600;margin-top:8px}
+.risk-sub{font-size:.85rem;color:var(--muted);margin-top:6px}
+.chart-wrap{margin-top:24px;height:280px}
+.features-detected{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.feat-pill{padding:4px 10px;border-radius:6px;font-size:.78rem;font-weight:600}
+.feat-on{background:rgba(16,185,129,.15);color:var(--grn);border:1px solid rgba(16,185,129,.2)}
+.feat-off{background:var(--card);color:var(--faint);border:1px solid var(--border)}
+
+/* ── Tabs (diabetes form) ───────────────────────────────── */
+.tabs{display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border);padding-bottom:0}
+.tab{padding:8px 18px;border-radius:8px 8px 0 0;background:none;border:none;
+    color:var(--muted);font-family:var(--font);font-weight:600;font-size:.84rem;
+    cursor:pointer;transition:.2s;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab.active{color:var(--pur);border-bottom-color:var(--pur);background:rgba(139,92,246,.07)}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp .25s ease}
+
+/* ── Scroll animations ──────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(32px);transition:opacity .65s ease,transform .65s ease}
+.reveal.visible{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+.reveal-delay-4{transition-delay:.4s}
+
+/* ── Separator ──────────────────────────────────────────── */
+.section-sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0}
+
+/* ── Footer ─────────────────────────────────────────────── */
+footer{padding:48px 0;border-top:1px solid var(--border);margin-top:80px}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:var(--font);font-size:.95rem;font-weight:700;color:var(--muted)}
+.footer-credits{font-size:.8rem;color:var(--faint)}
+.footer-badges{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ── Gauge CSS ───────────────────────────────────────────── */
+.gauge-outer{width:160px;height:80px;position:relative;margin:0 auto 16px;overflow:hidden}
+.gauge-track{fill:none;stroke:rgba(255,255,255,.06);stroke-width:18;stroke-linecap:round}
+.gauge-fill{fill:none;stroke-width:18;stroke-linecap:round;transition:stroke-dashoffset 1s ease,stroke .3s}
+
+/* ── Disclaimer ──────────────────────────────────────────── */
+.disclaimer{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);
+    border-radius:10px;padding:14px 18px;font-size:.82rem;color:var(--muted);
+    margin-top:20px;display:flex;gap:10px;align-items:flex-start}
+.disclaimer-icon{font-size:1rem;flex-shrink:0;margin-top:1px}
+
+/* ── Mobile ─────────────────────────────────────────────── */
+@media(max-width:768px){
+  .hero-cards{grid-template-columns:1fr}
+  .story-grid{grid-template-columns:1fr}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid-2,.form-grid-3,.form-grid-4{grid-template-columns:1fr}
+  .nav-links .nav-text{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Ambient orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- ═══════ NAVIGATION ═══════ -->
+<nav>
+  <div class="container nav-inner">
+    <a class="nav-logo" href="#hero">
+      <div class="nav-logo-icon">✦</div>
+      <span class="nav-logo-text">Analytix Intelligence</span>
+    </a>
+    <div class="nav-links">
+      <a href="#nightprice" class="active">
+        <span class="nav-text">NightPrice</span>
+        <span class="nav-badge badge-red">AI</span>
+      </a>
+      <a href="#mediguard">
+        <span class="nav-text">MediGuard</span>
+        <span class="nav-badge badge-pur">ML</span>
+      </a>
+      <a href="#nightprice" style="margin-left:8px;border-color:rgba(255,56,92,.3);color:var(--red)" id="nav-demo-btn">
+        Live Demo ↗
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════ HERO ═══════ -->
+<section class="hero" id="hero">
+  <div class="hero-eyebrow">
+    <span></span>
+    Plataforma activa · 2 modelos en producción
+  </div>
+  <h1>Machine learning que<br/><span>transforma industrias</span></h1>
+  <p class="hero-sub">
+    Dos soluciones impulsadas por datos reales. Desde optimizar precios de hospedaje en CDMX
+    hasta detectar el riesgo de diabetes antes de que el paciente lo sepa.
+  </p>
+
+  <div class="hero-cards">
+    <a class="hero-card" href="#nightprice">
+      <span class="hc-tag hc-tag-red">Precio · Regresión</span>
+      <h3>🏙️ NightPrice AI</h3>
+      <p>Predice el precio óptimo por noche para listings de Airbnb en Ciudad de México usando geolocalización inteligente y 55+ variables.</p>
+      <span class="hc-arrow">↗</span>
+    </a>
+    <a class="hero-card" href="#mediguard">
+      <span class="hc-tag hc-tag-pur">Salud · Clasificación</span>
+      <h3>🩺 MediGuard</h3>
+      <p>Clasifica el riesgo individual de diabetes o prediabetes usando 21 indicadores de salud del estudio BRFSS del CDC.</p>
+      <span class="hc-arrow">↗</span>
+    </a>
+  </div>
+
+  <div class="scroll-hint">
+    <span>Scroll para explorar</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════ NIGHTPRICE ═══════ -->
+<section class="section" id="nightprice">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="section-header reveal">
+      <div class="section-tag tag-red">🏙️ Producto 01 · Regresión</div>
+      <h2>Presenta: <span class="grad-red">NightPrice AI</span></h2>
+      <p>La inteligencia de precios que los anfitriones de CDMX necesitaban</p>
+    </div>
+
+    <!-- Story -->
+    <div class="story-grid">
+      <div class="story-text reveal reveal-delay-1">
+        <h3>El problema</h3>
+        <p>
+          En 2024, <strong>más de 27,000 anfitriones</strong> en Ciudad de México compiten en el mercado de Airbnb sin herramientas de inteligencia de precios. La mayoría fija tarifas por instinto: cobran demasiado y pierden reservas, o cobran poco y dejan dinero sobre la mesa.
+        </p>
+        <p>
+          El precio óptimo depende de decenas de factores simultáneos: <strong>la distancia a Polanco o la Condesa</strong>, si el título menciona palabras clave de lujo, el historial de reseñas del listing, la temporada y hasta la disponibilidad relativa del host. Ningún ser humano puede procesar todo eso en tiempo real.
+        </p>
+        <h3 style="margin-top:20px">La solución</h3>
+        <p>
+          NightPrice AI entrenó un <strong>ensemble de LightGBM + XGBoost</strong> sobre 22,712 listings reales de Inside Airbnb CDMX. El modelo incorpora <strong>55 variables</strong>, incluyendo 8 distancias geográficas calculadas desde cada propiedad hasta las zonas de mayor demanda de la ciudad. El tuning bayesiano con Optuna (100 trials) encontró los hiperparámetros óptimos que un search aleatorio jamás habría alcanzado.
+        </p>
+        <div class="tech-pills">
+          <span class="pill pill-accent-red">LightGBM</span>
+          <span class="pill pill-accent-red">XGBoost</span>
+          <span class="pill">Optuna (100 trials)</span>
+          <span class="pill">TargetEncoder</span>
+          <span class="pill">KFold-5</span>
+          <span class="pill">{{ reg_n_features }} features</span>
+          <span class="pill">{{ reg_n_new }} features nuevas</span>
+          <span class="pill">Inside Airbnb · CDMX 2024</span>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2">
+        <div class="stat-mini">
+          <div class="val" style="color:var(--red)">27,000+</div>
+          <div class="lbl">Listings analizados en CDMX</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--ora)">16 alcaldías</div>
+          <div class="lbl">Cobertura geográfica completa</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--grn)">{{ reg_n_features }} variables</div>
+          <div class="lbl">Features de entrenamiento ({{ reg_n_new }} ingeniería avanzada)</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--pur)">8 zonas</div>
+          <div class="lbl">Distancias a Polanco, Condesa, Reforma, Zócalo, AICM y más</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reveal divider -->
+    <div class="reveal-divider reveal">
+      <span>Métricas de desempeño del modelo</span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-grid">
+      <div class="metric-card reveal reveal-delay-1">
+        <div class="m-lbl">R² Test (log scale)</div>
+        <div class="m-val m-val-red" data-count="{{ reg_r2_log }}" data-decimals="4">{{ reg_r2_log }}</div>
+        <div class="m-sub">escala de entrenamiento</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-2">
+        <div class="m-lbl">R² Test (MXN)</div>
+        <div class="m-val m-val-pur" data-count="{{ reg_r2_orig }}" data-decimals="4">{{ reg_r2_orig }}</div>
+        <div class="m-sub">escala real de precios</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-3">
+        <div class="m-lbl">MAE Test</div>
+        <div class="m-val m-val-grn" data-count="{{ reg_mae }}" data-prefix="$" data-suffix=" MXN" data-decimals="0">${{ reg_mae|int }}</div>
+        <div class="m-sub">error absoluto medio / noche</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-4">
+        <div class="m-lbl">RMSE Test</div>
+        <div class="m-val m-val-ora" data-count="{{ reg_rmse }}" data-prefix="$" data-suffix=" MXN" data-decimals="0">${{ reg_rmse|int }}</div>
+        <div class="m-sub">raíz del error cuadrático medio</div>
+      </div>
+    </div>
+
+    <!-- Reveal divider 2 -->
+    <div class="reveal-divider reveal">
+      <span>Predictor en vivo</span>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card reveal">
+      <div class="form-section-title">📍 Ubicación y tipo</div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Alcaldía (neighbourhood)</label>
+          <select id="reg-neighbourhood">
+            {% for nb in neighbourhoods %}<option value="{{ nb }}">{{ nb }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo de habitación</label>
+          <select id="reg-room-type">
+            {% for rt in room_types %}<option value="{{ rt }}">{{ rt }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>Título del listing (name) <span style="color:var(--faint);font-size:.73rem;text-transform:none">— keywords: luxury, loft, studio, pool, parking, gym, wifi, view…</span></label>
+        <input type="text" id="reg-name" value="Cozy Loft with Gym and Panoramic View" placeholder="Ej. Modern Studio near Reforma"/>
+      </div>
+
+      <div class="form-section-title">📊 Actividad y disponibilidad</div>
+      <div class="form-grid-4">
+        <div class="field">
+          <label>Noches mínimas</label>
+          <input type="number" id="reg-min-nights" value="2" min="1" max="365"/>
+        </div>
+        <div class="field">
+          <label>Disponibilidad (días/año)</label>
+          <input type="number" id="reg-availability" value="200" min="0" max="365"/>
+        </div>
+        <div class="field">
+          <label>Total reseñas</label>
+          <input type="number" id="reg-n-reviews" value="45" min="0"/>
+        </div>
+        <div class="field">
+          <label>Reseñas / mes</label>
+          <input type="number" id="reg-rpm" value="2.5" step="0.1" min="0"/>
+        </div>
+      </div>
+      <div class="form-grid-4" style="margin-top:12px">
+        <div class="field">
+          <label>Reseñas últimos 12m</label>
+          <input type="number" id="reg-rev-ltm" value="18" min="0"/>
+        </div>
+        <div class="field">
+          <label>Listings del host</label>
+          <input type="number" id="reg-host-listings" value="1" min="1"/>
+        </div>
+        <div class="field">
+          <label>Última reseña (fecha)</label>
+          <input type="date" id="reg-last-review" value="2025-03-15"/>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <button class="btn-predict btn-red" id="btn-predict-airbnb">
+            ✦ Predecir precio / noche
+          </button>
+        </div>
+      </div>
+
+      <div class="spinner" id="spinner-airbnb">Calculando predicción…</div>
+
+      <div id="result-airbnb">
+        <div class="result-card result-red">
+          <div class="price-display">
+            <div style="font-size:.85rem;color:var(--muted);margin-bottom:6px">Precio estimado por noche</div>
+            <div class="price-tag" id="result-price">—</div>
+            <div class="price-sub" id="result-compare">—</div>
+          </div>
+          <div class="features-detected" id="features-detected"></div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="chart-airbnb"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-sep"></div>
+
+<!-- ═══════ MEDIGUARD ═══════ -->
+<section class="section" id="mediguard">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="section-header reveal">
+      <div class="section-tag tag-pur">🩺 Producto 02 · Clasificación</div>
+      <h2>Presenta: <span class="grad-pur">MediGuard</span></h2>
+      <p>Detección temprana del riesgo de diabetes antes del diagnóstico clínico</p>
+    </div>
+
+    <!-- Story -->
+    <div class="story-grid">
+      <div class="story-text reveal reveal-delay-1">
+        <h3>El problema</h3>
+        <p>
+          Estados unidos enfrenta una <strong>epidemia silenciosa</strong>: 40 millones de personas viven con diabetes y se estima que <strong>3 de cada 10 aún no han sido diagnosticadas</strong>. Muchos solo descubren la enfermedad cuando ya existen complicaciones —neuropatía, retinopatía, daño renal— que pudieron prevenirse con detección temprana.
+        </p>
+        <p>
+          El sistema de salud no puede hacer pruebas de glucosa masivas. Pero existe una alternativa: los <strong>indicadores de salud observable</strong> como el IMC, la presión arterial, el historial de enfermedades y el estilo de vida pueden predecir el riesgo <em>antes</em> del diagnóstico, priorizando quiénes deben hacerse la prueba de sangre primero.
+        </p>
+        <h3 style="margin-top:20px">La solución</h3>
+        <p>
+          MediGuard utiliza el dataset <strong>BRFSS 2015 del CDC</strong> (250,000+ encuestas de salud en EE.UU.) para entrenar un modelo XGBoost que maneja el <strong>desbalanceo 6:1</strong> (sanos vs. diabéticos) con <code>scale_pos_weight</code>. La métrica priorizada es el <strong>Recall</strong> (detectar el mayor % de casos reales), porque un falso negativo —un diabético no detectado— tiene consecuencias mucho más graves que una falsa alarma.
+        </p>
+        <div class="tech-pills">
+          <span class="pill pill-accent-pur">XGBoost Classifier</span>
+          <span class="pill">scale_pos_weight = {{ clf_ratio }}</span>
+          <span class="pill">KFold-5 CV</span>
+          <span class="pill">Umbral óptimo Youden</span>
+          <span class="pill">21 indicadores CDC</span>
+          <span class="pill">BRFSS 2015 · 250k+</span>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2">
+        <div class="stat-mini">
+          <div class="val" style="color:var(--pur)">250,000+</div>
+          <div class="lbl">Encuestas de salud CDC (BRFSS 2015)</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--red)">6.18 : 1</div>
+          <div class="lbl">Desbalanceo de clases (sanos/diabéticos)</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--grn)">78.9%</div>
+          <div class="lbl">Recall en test — casos reales detectados</div>
+        </div>
+        <div class="stat-mini">
+          <div class="val" style="color:var(--ora)">0.829</div>
+          <div class="lbl">AUC-ROC — capacidad discriminativa</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reveal divider -->
+    <div class="reveal-divider reveal">
+      <span>Métricas de desempeño del modelo</span>
+    </div>
+
+    <!-- Metrics -->
+    <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr)">
+      <div class="metric-card reveal reveal-delay-1">
+        <div class="m-lbl">Recall</div>
+        <div class="m-val m-val-red" data-count="{{ clf_recall }}" data-decimals="4">{{ clf_recall }}</div>
+        <div class="m-sub">prioridad clínica #1</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-2">
+        <div class="m-lbl">F1-Score</div>
+        <div class="m-val m-val-pur" data-count="{{ clf_f1 }}" data-decimals="4">{{ clf_f1 }}</div>
+        <div class="m-sub">balance recall / precisión</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-3">
+        <div class="m-lbl">ROC-AUC</div>
+        <div class="m-val m-val-grn" data-count="{{ clf_roc_auc }}" data-decimals="4">{{ clf_roc_auc }}</div>
+        <div class="m-sub">área bajo la curva ROC</div>
+      </div>
+      <div class="metric-card reveal reveal-delay-4">
+        <div class="m-lbl">Precisión</div>
+        <div class="m-val m-val-ora" data-count="{{ clf_precision }}" data-decimals="4">{{ clf_precision }}</div>
+        <div class="m-sub">exactitud en positivos</div>
+      </div>
+      <div class="metric-card reveal" style="transition-delay:.5s">
+        <div class="m-lbl">Umbral óptimo</div>
+        <div class="m-val m-val-blu" data-count="{{ clf_threshold }}" data-decimals="3">{{ clf_threshold }}</div>
+        <div class="m-sub">índice de Youden</div>
+      </div>
+    </div>
+
+    <!-- Reveal divider 2 -->
+    <div class="reveal-divider reveal">
+      <span>Evaluador de riesgo en vivo</span>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card reveal">
+      <div class="tabs" id="clf-tabs">
+        <button class="tab active" data-panel="tab-salud">📋 Métricas de salud</button>
+        <button class="tab" data-panel="tab-historial">🏥 Historial médico</button>
+        <button class="tab" data-panel="tab-estilo">🏃 Estilo de vida</button>
+        <button class="tab" data-panel="tab-demo">👤 Demografía</button>
+      </div>
+
+      <!-- Tab 1: Métricas de salud -->
+      <div class="tab-panel active" id="tab-salud">
+        <div class="form-grid-3">
+          <div class="field">
+            <label>IMC (BMI) <span style="color:var(--faint);font-size:.7rem">Normal: 18.5–24.9 | Sobrepeso: 25–29.9 | Obeso: ≥30</span></label>
+            <input type="number" id="clf-bmi" value="27.0" min="10" max="100" step="0.5"/>
+          </div>
+          <div class="field">
+            <label>Días mala salud mental (último mes)</label>
+            <input type="number" id="clf-ment-hlth" value="0" min="0" max="30"/>
+          </div>
+          <div class="field">
+            <label>Días mala salud física (último mes)</label>
+            <input type="number" id="clf-phys-hlth" value="0" min="0" max="30"/>
+          </div>
+        </div>
+        <div class="form-grid-4" style="margin-top:12px">
+          <div class="field">
+            <label>Salud general</label>
+            <select id="clf-gen-hlth">
+              <option value="1">1 — Excelente</option>
+              <option value="2">2 — Muy buena</option>
+              <option value="3" selected>3 — Buena</option>
+              <option value="4">4 — Regular</option>
+              <option value="5">5 — Pobre</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Presión arterial alta</label>
+            <select id="clf-high-bp">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Colesterol alto</label>
+            <select id="clf-high-chol">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Chequeo colesterol (5 años)</label>
+            <select id="clf-chol-check">
+              <option value="0">No</option><option value="1" selected>Sí</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Historial médico -->
+      <div class="tab-panel" id="tab-historial">
+        <div class="form-grid-3">
+          <div class="field">
+            <label>ACV / Stroke previo</label>
+            <select id="clf-stroke">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cardiopatía / Infarto (HeartDiseaseorAttack)</label>
+            <select id="clf-heart">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Dificultad para caminar</label>
+            <select id="clf-diff-walk">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2" style="margin-top:12px">
+          <div class="field">
+            <label>Tiene cobertura médica (AnyHealthcare)</label>
+            <select id="clf-any-hc">
+              <option value="0">No</option><option value="1" selected>Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>No fue al médico por costo (NoDocbcCost)</label>
+            <select id="clf-no-doc">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Estilo de vida -->
+      <div class="tab-panel" id="tab-estilo">
+        <div class="form-grid-3">
+          <div class="field">
+            <label>Fumador (≥100 cigarrillos en vida)</label>
+            <select id="clf-smoker">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Actividad física (últimos 30 días)</label>
+            <select id="clf-phys-act">
+              <option value="0">No</option><option value="1" selected>Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Consumo elevado de alcohol</label>
+            <select id="clf-hvy-alc">
+              <option value="0">No</option><option value="1">Sí</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid-2" style="margin-top:12px">
+          <div class="field">
+            <label>Consume frutas diariamente</label>
+            <select id="clf-fruits">
+              <option value="0">No</option><option value="1" selected>Sí</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Consume verduras diariamente</label>
+            <select id="clf-veggies">
+              <option value="0">No</option><option value="1" selected>Sí</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Demografía -->
+      <div class="tab-panel" id="tab-demo">
+        <div class="form-grid-2">
+          <div class="field">
+            <label>Sexo</label>
+            <select id="clf-sex">
+              <option value="0">Femenino (0)</option>
+              <option value="1">Masculino (1)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Grupo de edad</label>
+            <select id="clf-age">
+              <option value="1">18–24</option><option value="2">25–29</option>
+              <option value="3">30–34</option><option value="4">35–39</option>
+              <option value="5">40–44</option><option value="6">45–49</option>
+              <option value="7" selected>50–54</option><option value="8">55–59</option>
+              <option value="9">60–64</option><option value="10">65–69</option>
+              <option value="11">70–74</option><option value="12">75–79</option>
+              <option value="13">80+</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nivel educativo</label>
+            <select id="clf-education">
+              <option value="1">Sin educación formal</option>
+              <option value="2">Primaria incompleta</option>
+              <option value="3">Primaria completa</option>
+              <option value="4">Secundaria / Bachillerato</option>
+              <option value="5" selected>Técnico / Tecnólogo</option>
+              <option value="6">Universidad o más</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ingresos anuales (USD)</label>
+            <select id="clf-income">
+              <option value="1">&lt; $10,000</option><option value="2">$10k–$14,999</option>
+              <option value="3">$15k–$19,999</option><option value="4">$20k–$24,999</option>
+              <option value="5" selected>$25k–$34,999</option><option value="6">$35k–$49,999</option>
+              <option value="7">$50k–$74,999</option><option value="8">&gt; $75,000</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-predict btn-pur" id="btn-predict-diabetes" style="margin-top:24px">
+        🔬 Evaluar riesgo de diabetes
+      </button>
+      <div class="spinner" id="spinner-diabetes">Analizando indicadores de salud…</div>
+
+      <div id="result-diabetes">
+        <div class="result-card" id="result-diab-card">
+          <div class="risk-display">
+            <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Probabilidad estimada de diabetes / prediabetes</div>
+            <div class="risk-percent" id="risk-percent">—</div>
+            <div class="risk-label" id="risk-label">—</div>
+            <div class="risk-sub" id="risk-sub">—</div>
+          </div>
+          <div class="chart-wrap" style="height:220px">
+            <canvas id="chart-diabetes"></canvas>
+          </div>
+        </div>
+        <div class="disclaimer">
+          <span class="disclaimer-icon">⚕️</span>
+          <span><strong>Aviso médico:</strong> MediGuard es un prototipo educativo de Machine Learning. Las predicciones <em>no constituyen diagnóstico médico</em>. Consulta siempre a un profesional de la salud certificado antes de tomar decisiones clínicas.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════ FOOTER ═══════ -->
+<footer>
+  <div class="container footer-inner">
+    <div>
+      <div class="footer-logo">✦ Analytix Intelligence</div>
+      <div class="footer-credits" style="margin-top:6px">Proyecto Final · Analítica de Datos · Universidad de Antioquia · 2026</div>
+    </div>
+    <div class="footer-badges">
+      <span class="nav-badge badge-red">NightPrice AI · Lab 4</span>
+      <span class="nav-badge badge-pur">MediGuard · Lab 5</span>
+      <span class="nav-badge badge-grn">Ensemble LightGBM+XGBoost</span>
+      <span class="nav-badge badge-ora">XGBoost Classifier</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Chart registry ────────────────────────────────────────
+let _chartAirbnb  = null;
+let _chartDiab    = null;
+
+// ── Scroll reveal ─────────────────────────────────────────
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }});
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+// ── Tabs ──────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panelId = btn.dataset.panel;
+    btn.closest('.form-card').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.closest('.form-card').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(panelId).classList.add('active');
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────
+const fmt = (n) => new Intl.NumberFormat('es-MX', {style:'currency',currency:'MXN',maximumFractionDigits:0}).format(n);
+const fmtNum = (n, d=0) => n.toFixed(d);
+
+function showSpinner(id, show) {
+  document.getElementById(id).classList.toggle('show', show);
+}
+
+// ── NightPrice prediction ──────────────────────────────────
+document.getElementById('btn-predict-airbnb').addEventListener('click', async () => {
+  const payload = {
+    neighbourhood:    document.getElementById('reg-neighbourhood').value,
+    room_type:        document.getElementById('reg-room-type').value,
+    name:             document.getElementById('reg-name').value,
+    minimum_nights:   +document.getElementById('reg-min-nights').value,
+    availability_365: +document.getElementById('reg-availability').value,
+    number_of_reviews:+document.getElementById('reg-n-reviews').value,
+    reviews_per_month:+document.getElementById('reg-rpm').value,
+    reviews_ltm:      +document.getElementById('reg-rev-ltm').value,
+    host_listings:    +document.getElementById('reg-host-listings').value,
+    last_review:       document.getElementById('reg-last-review').value,
+  };
+
+  showSpinner('spinner-airbnb', true);
+  document.getElementById('result-airbnb').classList.remove('show');
+
+  try {
+    const res  = await fetch('/api/predict/airbnb', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+
+    // Price display
+    document.getElementById('result-price').textContent = fmt(data.price);
+    const sign = data.pct_diff >= 0 ? '+' : '';
+    const dir  = data.pct_diff >= 0 ? 'por encima' : 'por debajo';
+    document.getElementById('result-compare').innerHTML =
+      `Mediana en <strong>${payload.neighbourhood}</strong>: ${fmt(data.median_neigh)} / noche &nbsp;·&nbsp; Tu listing está <strong>${sign}${Math.abs(data.pct_diff).toFixed(1)}% ${dir}</strong> de la mediana`;
+
+    // Features detected from name
+    const name = payload.name.toLowerCase();
+    const feats = [
+      ['🏙️ Luxury/Premium', /luxury|lujo|deluxe|premium|vip|suite|penthouse/.test(name)],
+      ['🛁 Jacuzzi/Tina',    /jacuzzi|tina|hidromasaje/.test(name)],
+      ['🌊 Pool/Alberca',    /pool|alberca|piscina/.test(name)],
+      ['🏋️ Gym/Fitness',    /gym|gimnasio|fitness/.test(name)],
+      ['🌅 Vista/View',      /view|vista|panoram|skyline/.test(name)],
+      ['🅿️ Parking',        /parking|estacionamiento|garage/.test(name)],
+      ['☕ Cocina/Kitchen',  /kitchen|cocina|kitchenette/.test(name)],
+      ['📶 WiFi',            /wifi|wi-fi|internet/.test(name)],
+      ['❄️ AC',              /\bac\b|a\/c|aire/.test(name)],
+      ['🏠 Departamento',    /apartment|departamento|depto/.test(name)],
+      ['🏡 Casa/House',      /\bhouse\b|\bcasa\b/.test(name)],
+    ];
+    const container = document.getElementById('features-detected');
+    container.innerHTML = feats.map(([label, active]) =>
+      `<span class="feat-pill ${active ? 'feat-on' : 'feat-off'}">${label}</span>`
+    ).join('');
+
+    // Bar chart by neighbourhood
+    if (_chartAirbnb) _chartAirbnb.destroy();
+    const entries = Object.entries(data.all_prices).sort((a,b) => a[1]-b[1]);
+    const labels  = entries.map(e => e[0]);
+    const values  = entries.map(e => e[1]);
+    const colors  = labels.map(l => l === payload.neighbourhood ? '#FF385C' : 'rgba(255,255,255,0.12)');
+
+    _chartAirbnb = new Chart(document.getElementById('chart-airbnb'), {
+      type: 'bar',
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 6, borderWidth: 0 }] },
+      options: {
+        indexAxis: 'y',
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmt(ctx.raw) }}},
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,.05)' }, ticks: { color: '#8b9cb8', callback: v => `$${(v/1000).toFixed(0)}k` }},
+          y: { grid: { display: false }, ticks: { color: '#8b9cb8', font: { size: 11 }}}
+        },
+        backgroundColor: 'transparent',
+        responsive: true,
+        maintainAspectRatio: false,
+      }
+    });
+
+    document.getElementById('result-airbnb').classList.add('show');
+  } catch(err) {
+    alert('Error: ' + err.message);
+  } finally {
+    showSpinner('spinner-airbnb', false);
+  }
+});
+
+// ── MediGuard prediction ───────────────────────────────────
+document.getElementById('btn-predict-diabetes').addEventListener('click', async () => {
+  const payload = {
+    BMI:                  +document.getElementById('clf-bmi').value,
+    MentHlth:             +document.getElementById('clf-ment-hlth').value,
+    PhysHlth:             +document.getElementById('clf-phys-hlth').value,
+    HighBP:               +document.getElementById('clf-high-bp').value,
+    HighChol:             +document.getElementById('clf-high-chol').value,
+    CholCheck:            +document.getElementById('clf-chol-check').value,
+    Smoker:               +document.getElementById('clf-smoker').value,
+    Stroke:               +document.getElementById('clf-stroke').value,
+    HeartDiseaseorAttack: +document.getElementById('clf-heart').value,
+    PhysActivity:         +document.getElementById('clf-phys-act').value,
+    Fruits:               +document.getElementById('clf-fruits').value,
+    Veggies:              +document.getElementById('clf-veggies').value,
+    HvyAlcoholConsump:    +document.getElementById('clf-hvy-alc').value,
+    AnyHealthcare:        +document.getElementById('clf-any-hc').value,
+    NoDocbcCost:          +document.getElementById('clf-no-doc').value,
+    DiffWalk:             +document.getElementById('clf-diff-walk').value,
+    Sex:                  +document.getElementById('clf-sex').value,
+    GenHlth:              +document.getElementById('clf-gen-hlth').value,
+    Age:                  +document.getElementById('clf-age').value,
+    Education:            +document.getElementById('clf-education').value,
+    Income:               +document.getElementById('clf-income').value,
+  };
+
+  showSpinner('spinner-diabetes', true);
+  document.getElementById('result-diabetes').classList.remove('show');
+
+  try {
+    const res  = await fetch('/api/predict/diabetes', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error);
+
+    const pct   = data.probability_pct;
+    const card  = document.getElementById('result-diab-card');
+    card.className = 'result-card';
+
+    let riskColor, riskLabel, riskEmoji;
+    if (pct < 30) {
+      card.classList.add('result-grn');
+      riskColor = '#10b981'; riskLabel = 'Riesgo BAJO'; riskEmoji = '✅';
+    } else if (pct < 60) {
+      card.classList.add('result-ora');
+      riskColor = '#f59e0b'; riskLabel = 'Riesgo MODERADO'; riskEmoji = '⚠️';
+    } else {
+      card.classList.add('result-danger');
+      riskColor = '#ef4444'; riskLabel = 'Riesgo ELEVADO'; riskEmoji = '🔴';
+    }
+
+    document.getElementById('risk-percent').textContent = pct.toFixed(1) + '%';
+    document.getElementById('risk-percent').style.color = riskColor;
+    document.getElementById('risk-label').textContent  = `${riskEmoji} ${riskLabel}`;
+    document.getElementById('risk-label').style.color  = riskColor;
+    document.getElementById('risk-sub').textContent    =
+      `Clasificación con umbral ${data.threshold}: ${data.prediction === 1 ? 'Positivo (diabetes/prediabetes)' : 'Negativo (sin diabetes)'}`;
+
+    // Doughnut gauge
+    if (_chartDiab) _chartDiab.destroy();
+    _chartDiab = new Chart(document.getElementById('chart-diabetes'), {
+      type: 'doughnut',
+      data: {
+        datasets: [{
+          data: [pct, 100 - pct],
+          backgroundColor: [riskColor, 'rgba(255,255,255,0.06)'],
+          borderWidth: 0, borderRadius: 8,
+        }]
+      },
+      options: {
+        cutout: '72%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { enabled: false },
+        },
+        responsive: true, maintainAspectRatio: false,
+      },
+      plugins: [{
+        id: 'centerText',
+        afterDraw(chart) {
+          const { ctx, width, height } = chart;
+          ctx.save();
+          ctx.font = `bold ${width * .14}px 'Plus Jakarta Sans', sans-serif`;
+          ctx.fillStyle = riskColor;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(pct.toFixed(1) + '%', width / 2, height / 2);
+          ctx.restore();
+        }
+      }]
+    });
+
+    document.getElementById('result-diabetes').classList.add('show');
+  } catch(err) {
+    alert('Error: ' + err.message);
+  } finally {
+    showSpinner('spinner-diabetes', false);
+  }
+});
+
+// ── Nav active on scroll ───────────────────────────────────
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
